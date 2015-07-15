@@ -87,8 +87,6 @@
             key: function (data) {
                 var smartBoxEvent;
 
-                $$log('log', 'Key down: ' + data.name + (data.digit != null ? ' ' + data.digit : ''));
-
                 smartBoxEvent = translateKeyToSmartBoxCode(data);
 
                 if (smartBoxEvent.name === 'REC') {
@@ -127,11 +125,11 @@
 
                     values = JSON.stringify(data.value);
 
-                    $$log('log', 'get values from storage:' +  values[i].value);
+                    $$log('get values from storage:' +  values[i].value, 'log');
 
                     i = 0; len = values.length;
                     for (; i < len; i++) {
-                        $$log('log', + '::' + values[i].id);
+                        $$log(values[i].id, 'log');
                         $('#' +  values[i].id).val( values[i].value);
                     }
                 }
@@ -179,7 +177,7 @@
                     page[message.type](message, event);
                 }
             } catch (e) {
-                $$log('log', e.message);
+                $$log(e.message, 'log');
             }
         });
 
