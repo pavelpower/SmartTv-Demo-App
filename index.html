@@ -88,12 +88,12 @@
 
                 smartBoxEvent = translateKeyToSmartBoxCode(data);
 
-                if (smartBoxEvent.name === 'nav_key:setup') {
+                if (smartBoxEvent.name === 'setup') {
                     this.getNetworkConfiguration();
                     return;
                 }
 
-                $(document.body).trigger(smartBoxEvent.name, smartBoxEvent.data);
+                $$nav.triggerKeyEvent(smartBoxEvent.name, data);
             },
 
             getNetworkConfiguration: function () {
@@ -133,20 +133,20 @@
                 data.num = data.digit;
 
                 return {
-                    name: 'nav_key:num',
+                    name: 'num',
                     data: data
                 }
             }
 
             if (transHeshKey[smartboxKeyName]) {
                 return {
-                    name: 'nav_key:' + transHeshKey[smartboxKeyName].toLowerCase(),
+                    name: transHeshKey[smartboxKeyName].toLowerCase(),
                     data: data
                 }
             }
 
             return {
-                name: 'nav_key:' + smartboxKeyName.toLowerCase(),
+                name: smartboxKeyName.toLowerCase(),
                 data: data
             };
         }
