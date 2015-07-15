@@ -87,7 +87,7 @@
             key: function (data) {
                 var smartBoxEvent;
 
-                $$log('Key down:', data.name + (data.digit != null ? ' ' + data.digit : ''));
+                $$log('log', 'Key down: ' + data.name + (data.digit != null ? ' ' + data.digit : ''));
 
                 smartBoxEvent = translateKeyToSmartBoxCode(data);
 
@@ -121,17 +121,18 @@
             },
 
             response: function (data) {
-                var key;
+                var values, i, len;
 
-                if (data.name === 'getValue') {
+                if (data.name === 'getValue' && data.key === 'inputs') {
 
-                    $$log('get values from storage:');
+                    values = JSON.stringify(data.value);
 
-                    for (key in data.value) {
-                        $$log(key + '::' + data.value);
-                        if (data.value[key].id && data.value[key].value) {
-                            $('#' + data.value[key].id).val(data.value[key].value);
-                        }
+                    $$log('log', 'get values from storage:' +  values[i].value);
+
+                    i = 0; len = values.length;
+                    for (; i < len; i++) {
+                        $$log('log', + '::' + values[i].id);
+                        $('#' +  values[i].id).val( values[i].value);
                     }
                 }
             }
@@ -178,7 +179,7 @@
                     page[message.type](message, event);
                 }
             } catch (e) {
-                $$log('error', e.message);
+                $$log('log', e.message);
             }
         });
 
