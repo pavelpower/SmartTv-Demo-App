@@ -115,7 +115,8 @@
             getInputsValues: function () {
                 this._source.postMessage(JSON.stringify({
                     type: 'api',
-                    name: 'getValue'
+                    name: 'getValue',
+                    key: 'inputs'
                 }), this._source_origin);
             },
 
