@@ -95,7 +95,7 @@
                     this.setInputsValues();
                 }
 
-                $$nav.triggerKeyEvent(smartBoxEvent.name.toLowerCase(), data);
+                $$nav.triggerKeyEvent(smartBoxEvent.name.toLowerCase(), smartBoxEvent.data);
             },
 
             setInputsValues: function () {
@@ -151,24 +151,22 @@
             smartboxKeyName = data.name.replace('key', '');
 
             if (smartboxKeyName === 'DIGIT') {
-                data.num = data.digit;
-
                 return {
                     name: 'NUM',
-                    data: data
+                    data: {
+                        num: data.digit
+                    }
                 }
             }
 
             if (transHeshKey[smartboxKeyName]) {
                 return {
-                    name: transHeshKey[smartboxKeyName],
-                    data: data
+                    name: transHeshKey[smartboxKeyName]
                 }
             }
 
             return {
-                name: smartboxKeyName,
-                data: data
+                name: smartboxKeyName
             };
         }
 

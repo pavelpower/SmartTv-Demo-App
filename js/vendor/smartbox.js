@@ -1504,9 +1504,6 @@ $(function(){
 			var ev,
 				commonEvent;
 
-            console.log(key, data);
-            console.log("nav_key:" + key, data);
-
 			if ( navCur ) {
 				ev = $.Event("nav_key:" + key, data || {});
 				commonEvent = $.Event("nav_key");
