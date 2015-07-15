@@ -123,7 +123,7 @@
 
                 if (data.name === 'getValue' && data.key === 'inputs') {
 
-                    values = JSON.stringify(data.value);
+                    values = JSON.parse(data.value);
 
                     len = values.length;
 
