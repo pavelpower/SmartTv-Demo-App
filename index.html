@@ -119,15 +119,16 @@
             },
 
             response: function (data) {
-                var values, i, len;
+                var values, i = 0, len;
 
                 if (data.name === 'getValue' && data.key === 'inputs') {
 
                     values = JSON.stringify(data.value);
 
+                    len = values.length;
+
                     $$log('get values from storage:' +  values[i].value, 'log');
 
-                    i = 0; len = values.length;
                     for (; i < len; i++) {
                         $$log(values[i].id, 'log');
                         $('#' +  values[i].id).val( values[i].value);
