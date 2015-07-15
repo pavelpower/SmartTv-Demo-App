@@ -29,18 +29,18 @@
         <div class="scene scene_input js-scene-input">
             <div class="input-example">
                 <h2>Standart input</h2>
-                <input class="input-item js-input-1 nav-item"/>
+                <input id="input-1-value" class="input-item js-input-1 nav-item"/>
                 <div class="input-val">
-                    Input value: <span class="js-input-1-val"></span>
+                    Input value: <span id="input-1" class="js-input-1-val"></span>
                 </div>
             </div>
             <div class="input-example">
                 <h2>Input with email keyboard</h2>
-                <input class="input-item js-input-2 nav-item"/>
+                <input id="input-2-value" class="input-item js-input-2 nav-item"/>
             </div>
             <div class="input-example">
                 <h2>Input with num keyboard and maximum 4 signs</h2>
-                <input class="input-item js-input-3 nav-item"/>
+                <input id="input-3-value" class="input-item js-input-3 nav-item"/>
             </div>
         </div>
         <div class="scene js-scene-navigation">
@@ -80,36 +80,57 @@
             init: function (data, orignEvent) {
                 this._source = orignEvent.source;
                 this._source_origin = orignEvent.origin;
+
+                this.getInputsValues();
             },
 
             key: function (data) {
                 var smartBoxEvent;
+
                 $$log('Key down:', data.name + (data.digit != null ? ' ' + data.digit : ''));
 
                 smartBoxEvent = translateKeyToSmartBoxCode(data);
 
-                if (smartBoxEvent.name === 'setup') {
-                    this.getNetworkConfiguration();
-                    return;
+                if (smartBoxEvent.name === 'REC') {
+                    this.setInputsValues();
                 }
 
-                $$nav.triggerKeyEvent(smartBoxEvent.name, data);
+                $$nav.triggerKeyEvent(smartBoxEvent.name.toLowerCase(), data);
             },
 
-            getNetworkConfiguration: function () {
+            setInputsValues: function () {
                 this._source.postMessage(JSON.stringify({
                     type: 'api',
-                    name: 'getNetworkConfiguration'
+                    name: 'setValue',
+                    key: 'inputs',
+                    value: $('input').map(function(i, elem) {
+                        return {
+                            id: $(elem).attr('id'),
+                            value: $(elem).val()
+                        }
+                    })
+                }), this._source_origin);
+            },
+
+            getInputsValues: function () {
+                this._source.postMessage(JSON.stringify({
+                    type: 'api',
+                    name: 'getValue'
                 }), this._source_origin);
             },
 
             response: function (data) {
                 var key;
-                if (data.name === 'getNetworkConfiguration') {
 
-                    $$log('network config...');
+                if (data.name === 'getValue') {
+
+                    $$log('get values from storage:');
+
                     for (key in data.value) {
-                        $$log(key, data.value[key]);
+                        $$log(key + '::' + data.value);
+                        if (data.value[key].id && data.value[key].value) {
+                            $('#' + data.value[key].id).val(data.value[key].value);
+                        }
                     }
                 }
             }
@@ -133,20 +154,20 @@
                 data.num = data.digit;
 
                 return {
-                    name: 'num',
+                    name: 'NUM',
                     data: data
                 }
             }
 
             if (transHeshKey[smartboxKeyName]) {
                 return {
-                    name: transHeshKey[smartboxKeyName].toLowerCase(),
+                    name: transHeshKey[smartboxKeyName],
                     data: data
                 }
             }
 
             return {
-                name: smartboxKeyName.toLowerCase(),
+                name: smartboxKeyName,
                 data: data
             };
         }
@@ -155,7 +176,7 @@
             try {
                 var message = JSON.parse(event.data);
                 if (typeof page[message.type] === 'function') {
-                    page[message.type](message.data, event);
+                    page[message.type](message, event);
                 }
             } catch (e) {
                 $$log('error', e.message);
