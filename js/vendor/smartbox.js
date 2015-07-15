@@ -91,20 +91,7 @@
 			$$log(msg, 'error');
 		},
 
-		/**
-		 * Show messages in log
-		 * all functionality in main.js
-		 */
-		log: {
-			log: $.noop,
-			state: $.noop,
-			show: $.noop,
-			hide: $.noop,
-			startProfile: $.noop,
-			stopProfile: $.noop
-		},
-
-    legend: {}
+        legend: {}
 	};
 
 	$(function () {
@@ -1516,6 +1503,10 @@ $(function(){
 		function triggerKeyEvent ( key, data ) {
 			var ev,
 				commonEvent;
+
+            console.log(key, data);
+            console.log("nav_key:" + key, data);
+
 			if ( navCur ) {
 				ev = $.Event("nav_key:" + key, data || {});
 				commonEvent = $.Event("nav_key");
@@ -1674,6 +1665,13 @@ $(function(){
 				$el.addClass(this.higlight_class).trigger('nav_focus', [originEvent, old]);
 				return this;
 			},
+
+            /**
+             * 'nav_key:' event trigger
+             * @param key key name
+             * @param data event data
+             */
+            triggerKeyEvent: triggerKeyEvent,
 
 			/**
 			 * Turn on navigation in container, turn off previous navigation

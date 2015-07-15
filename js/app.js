@@ -9,6 +9,8 @@
     initialize: function () {
       this.$wrap = $('.wrap');
 
+      $$log('init App');
+
       Player.init();
       $$legend.show();
 
