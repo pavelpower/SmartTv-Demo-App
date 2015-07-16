@@ -106,7 +106,8 @@
                 this._source_origin = originEvent.origin;
 
                 inputs.on('nav_key:enter', function() {
-                    var value = $(this).find('.smart_input-text').text(),
+                    var domValue = $(this).find('.smart_input-text'),
+                        value = domValue.text(),
                         offset = $('.smart_input-wrap:first').offset(),
                         x = offset.left,
                         y = offset.top;
@@ -121,6 +122,8 @@
                     if (window['console']) {
                         console.log('enter');
                     }
+
+                    self.__domValue = domValue;
                 });
 
                 // Получить занчения сохраненные в Stage для Inputs
@@ -190,7 +193,11 @@
 
                 $$log('get values from keyboard ::' + data.value, 'log');
 
-                inputs.filter('.focus').find('.smart_input-text').val(data.value);
+                if (self.__domValue) {
+                    self.__domValue.text(data.value);
+
+                    self.__domValue = null;
+                }
                 // set value
             },
 
