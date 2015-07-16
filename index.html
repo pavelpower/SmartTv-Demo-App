@@ -30,22 +30,19 @@
             <div class="input-example">
                 <h2>Standart input</h2>
                 <div class="smart_input-wrap nav-item" data-layout="qwerty_en" data-selected-symbol="u">
-                    <span class="smart_input-text"></span>
-                </div>
-                <div class="input-val">
-                    Input value: <span id="input-1" class="js-input-1-val"></span>
+                    <span class="smart_input-text" id="input-1"></span>
                 </div>
             </div>
             <div class="input-example">
                 <h2>Input with email keyboard</h2>
                 <div class="smart_input-wrap nav-item" data-layout="qwerty_ru" data-selected-symbol="к">
-                    <span class="smart_input-text"></span>
+                    <span class="smart_input-text" id="input-2"></span>
                 </div>
             </div>
             <div class="input-example">
                 <h2>Input with num keyboard and maximum 4 signs</h2>
                 <div class="smart_input-wrap nav-item" data-layout="numbers" data-selected-symbol="5">
-                    <span class="smart_input-text"></span>
+                    <span class="smart_input-text" id="input-3"></span>
                 </div>
             </div>
         </div>
@@ -108,7 +105,7 @@
                 inputs.on('nav_key:enter', function() {
                     var domValue = $(this).find('.smart_input-text'),
                         value = domValue.text(),
-                        offset = $('.smart_input-wrap:first').offset(),
+                        offset = $(this).offset(),
                         x = offset.left,
                         y = offset.top;
 
@@ -221,10 +218,10 @@
                  */
 
                 var message = {},
-                    values =  $('input').map(function(i, elem) {
+                    values =  $('.smart_input-text').map(function(i, elem) {
                     return {
                         id: $(elem).attr('id'),
-                        value: $(elem).val()
+                        value: $(elem).text()
                     }
                 }).get();
 
