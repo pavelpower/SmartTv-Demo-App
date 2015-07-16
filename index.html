@@ -29,7 +29,7 @@
         <div class="scene scene_input js-scene-input">
             <div class="input-example">
                 <h2>Standart input</h2>
-                <div class="smart_input-wrap nav-item" data-layout="qwerty_en">
+                <div class="smart_input-wrap nav-item" data-layout="qwerty_en" data-selected-symbol="u">
                     <span class="smart_input-text"></span>
                 </div>
                 <div class="input-val">
@@ -38,13 +38,13 @@
             </div>
             <div class="input-example">
                 <h2>Input with email keyboard</h2>
-                <div class="smart_input-wrap nav-item" data-layout="qwerty_ru">
+                <div class="smart_input-wrap nav-item" data-layout="qwerty_ru" data-selected-symbol="к">
                     <span class="smart_input-text"></span>
                 </div>
             </div>
             <div class="input-example">
                 <h2>Input with num keyboard and maximum 4 signs</h2>
-                <div class="smart_input-wrap nav-item" data-layout="number">
+                <div class="smart_input-wrap nav-item" data-layout="number" data-selected-symbol="0">
                     <span class="smart_input-text"></span>
                 </div>
             </div>
@@ -116,7 +116,8 @@
                         x: x,
                         y: y,
                         value: value,
-                        layout: $(this).attr('data-layout')
+                        layout: $(this).attr('data-layout'),
+                        selectedSymbol: $(this).attr('data-selected-symbol')
                     });
 
                     if (window['console']) {
