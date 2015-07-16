@@ -107,8 +107,9 @@
 
                 inputs.on('nav_key:enter', function() {
                     var value = $(this).find('.smart_input-text').text(),
-                        x = $(this).offsetLeft(),
-                        y = $(this).offsetTop();
+                        offset = $('.smart_input-wrap:first').offset(),
+                        x = offset.left,
+                        y = offset.top;
 
                     self._showKeyboard({
                         x: x,
@@ -117,7 +118,9 @@
                         layout: $(this).attr('data-layout')
                     });
 
-                    console.log('enter:', arguemnts);
+                    if (window['console']) {
+                        console.log('enter');
+                    }
                 });
 
                 // Получить занчения сохраненные в Stage для Inputs
