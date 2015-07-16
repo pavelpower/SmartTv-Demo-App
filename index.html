@@ -149,18 +149,9 @@
             },
 
             /**
-             * Возвращение значение из native клавиатуры после ее скрытия
-             * @param {Object}  data
-             * @param {boolean} data.cancel - true - нажата клавиша отмены, false - нажата клавиша "ButtonEnter"
-             * @param {string}  data.value  - введенные данные
+             * Возврещение сохраненного результата после удачной операции записи в Stage
+             *
              */
-            keyboard: function (data) {
-
-                if (!data.cancel) {
-                    inputs.filter('.focus').find('.smart_input-text').val(data.value);
-                }
-            },
-
             valuesSaved: function (data) {
                 $$log('value "' + data + '" saved', 'log');
             },
@@ -193,11 +184,13 @@
              */
             getValuesForKeyboard: function (data) {
                 // get current input
-                    if (data.cancel) {
-                        return;
-                    }
+                if (data.cancel) {
+                    return;
+                }
 
-                    $$log('get values from keyboard ::' + data.value, 'log');
+                $$log('get values from keyboard ::' + data.value, 'log');
+
+                inputs.filter('.focus').find('.smart_input-text').val(data.value);
                 // set value
             },
 
