@@ -29,18 +29,24 @@
         <div class="scene scene_input js-scene-input">
             <div class="input-example">
                 <h2>Standart input</h2>
-                <input id="input-1-value" class="input-item js-input-1 nav-item"/>
+                <div class="smart_input-wrap nav-item" data-layout="qwerty_en">
+                    <span class="smart_input-text"></span>
+                </div>
                 <div class="input-val">
                     Input value: <span id="input-1" class="js-input-1-val"></span>
                 </div>
             </div>
             <div class="input-example">
                 <h2>Input with email keyboard</h2>
-                <input id="input-2-value" class="input-item js-input-2 nav-item"/>
+                <div class="smart_input-wrap nav-item" data-layout="qwerty_ru">
+                    <span class="smart_input-text"></span>
+                </div>
             </div>
             <div class="input-example">
                 <h2>Input with num keyboard and maximum 4 signs</h2>
-                <input id="input-3-value" class="input-item js-input-3 nav-item"/>
+                <div class="smart_input-wrap nav-item" data-layout="number">
+                    <span class="smart_input-text"></span>
+                </div>
             </div>
         </div>
         <div class="scene js-scene-navigation">
@@ -68,7 +74,17 @@
 <script type="text/javascript" src="js/scenes/input.js"></script>
 <script type="text/javascript" src="js/legendTriggers.js"></script>
 
+<style>
+    .smart_input-wrap.focus {
+        background: bisque;
+    }
+</style>
 <script>
+
+    var inputs = $('.smart_input-wrap').on('nav_focus', function () {
+        inputs.addClass('smart-input-active');
+        $(this).addClass('smart-input-active');
+    });
 
     (function(win, document) {
 
@@ -85,8 +101,24 @@
              * @param {Event} originEvent - событие от интерфейса postMessage
              */
             init: function (data, originEvent) {
+                var self = this;
                 this._source = originEvent.source;
                 this._source_origin = originEvent.origin;
+
+                inputs.on('nav_key:enter', function() {
+                    var value = $(this).find('.smart_input-text').text(),
+                        x = $(this).offsetLeft(),
+                        y = $(this).offsetTop();
+
+                    self._showKeyboard({
+                        x: x,
+                        y: y,
+                        value: value,
+                        layout: $(this).attr('data-layout')
+                    });
+
+                    console.log('enter:', arguemnts);
+                });
 
                 // Получить занчения сохраненные в Stage для Inputs
                 this._getInputsValues();
@@ -121,6 +153,9 @@
              */
             keyboard: function (data) {
 
+                if (!data.cancel) {
+                    inputs.filter('.focus').find('.smart_input-text').val(data.value);
+                }
             },
 
             valuesSaved: function (data) {
@@ -269,6 +304,9 @@
             _showKeyboard: function (options) {
                 var message = {};
 
+                // !!! Здесь полное описание только для того чтобы понимать тип и как передавать
+                // Важно передать только позицию x, y;
+
                 // указываем название функции которую хотим выполнить
                 message.name = 'showKeyboard';
 
@@ -283,12 +321,17 @@
                 message.captionOfButtonEnter = String(options.captionOfButtonEnter ||'Ok');
 
                 message.value = String(options.value);
-                message.cursorPositionInValue = Number(options.cursorPositionInValue);
+
+                if (options.cursorPositionInValue) {
+                    message.cursorPositionInValue = Number(options.cursorPositionInValue);
+                }
 
                 message.layout = String(options.layout || 'qwerty_ru');
                 message.upperCase = Boolean(options.upperCase);
 
-                message.selectedSymbol = String(options.selectedSymbol)[0];
+                if (options.selectedSymbol) {
+                    message.selectedSymbol = String(options.selectedSymbol)[0];
+                }
 
 
                 // Вернуть результат в функцию
