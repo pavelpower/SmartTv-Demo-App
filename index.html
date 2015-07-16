@@ -73,67 +73,232 @@
     (function(win, document) {
 
         /**
-         * Page controller
+         * Retranslator - контроллер транслирования команд из MTS-BOX в адаптивный сайт (этот)
+         * @type {Object}
          */
-        var page = {
-            // call after page load
-            init: function (data, orignEvent) {
-                this._source = orignEvent.source;
-                this._source_origin = orignEvent.origin;
+        var Retranslator = {
 
-                this.getInputsValues();
+            /**
+             * Инициализация - выполняется по команде от ядра
+             * После загрузки адаптивного сайта в `iframe`
+             * @param {Object} data - переданные данные для init пустые
+             * @param {Event} originEvent - событие от интерфейса postMessage
+             */
+            init: function (data, originEvent) {
+                this._source = originEvent.source;
+                this._source_origin = originEvent.origin;
+
+                // Получить занчения сохраненные в Stage для Inputs
+                this._getInputsValues();
             },
 
+            /**
+             * Контроллер клавишь
+             * @param {Object} data - переданные данные
+             * @param {String} data.name - код клавиши, см ./readme.md
+             * @param {Number} data.digit - имеет цифровое значение /[0..9]{1}/ если `data.name === 'keyDIGIT'`
+             */
             key: function (data) {
                 var smartBoxEvent;
 
+                // странсилировать названия клавишь в smartbox тип
                 smartBoxEvent = translateKeyToSmartBoxCode(data);
 
+                // по нажатию на кнопку `REC` показать лог
                 if (smartBoxEvent.name === 'REC') {
-                    this.setInputsValues();
+                    this._setInputsValues();
                 }
 
+                // Трансилировать нажатие клавиши в smatbox
                 $$nav.triggerKeyEvent(smartBoxEvent.name.toLowerCase(), smartBoxEvent.data);
             },
 
-            setInputsValues: function () {
-                this._source.postMessage(JSON.stringify({
-                    type: 'api',
-                    name: 'setValue',
-                    key: 'inputs',
-                    value: $('input').map(function(i, elem) {
-                        return {
-                            id: $(elem).attr('id'),
-                            value: $(elem).val()
-                        }
-                    }).get()
-                }), this._source_origin);
+            /**
+             * Возвращение значение из native клавиатуры после ее скрытия
+             * @param {Object}  data
+             * @param {boolean} data.cancel - true - нажата клавиша отмены, false - нажата клавиша "ButtonEnter"
+             * @param {string}  data.value  - введенные данные
+             */
+            keyboard: function (data) {
+
             },
 
-            getInputsValues: function () {
-                this._source.postMessage(JSON.stringify({
-                    type: 'api',
-                    name: 'getValue',
-                    key: 'inputs'
-                }), this._source_origin);
+            valuesSaved: function (data) {
+                $$log('value "' + data + '" saved', 'log');
             },
 
-            response: function (data) {
+            /**
+             * Заполнить значениями input-ты на странице, из Storage устройства
+             *
+             * @param {String} data - сохраненное значение
+             */
+            fullInputsFromStage: function (data) {
                 var values, i = 0, len;
 
-                if (data.name === 'getValue' && data.key === 'inputs') {
+                values = JSON.parse(data);
 
-                    values = JSON.parse(data.value);
+                len = values.length;
 
-                    len = values.length;
+                $$log('get values from storage:' +  values[i].value, 'log');
 
-                    $$log('get values from storage:' +  values[i].value, 'log');
-
-                    for (; i < len; i++) {
-                        $$log(values[i].id, 'log');
-                        $('#' +  values[i].id).val( values[i].value);
-                    }
+                for (; i < len; i++) {
+                    $$log(values[i].id, 'log');
+                    $('#' +  values[i].id).val( values[i].value);
                 }
+            },
+
+            /**
+             * Получение значения из native клавиатуры
+             * @param {Object} data
+             * @param {boolean} data.cancel - флаг нажатия клавиши Cancel
+             * @param {string} data.value - Значение из клавиатуры
+             */
+            getValuesForKeyboard: function (data) {
+                // get current input
+                    if (data.cancel) {
+                        return;
+                    }
+
+                    $$log('get values from keyboard ::' + data.value, 'log');
+                // set value
+            },
+
+            /**
+             * Сохранить значения всех inputs на странице
+             * @private
+             */
+            _setInputsValues: function () {
+
+                /**
+                 * Формирование сообщения для отправки к API Портала
+                 * @name message
+                 * @type {Object}
+                 */
+
+                /**
+                 * массив объектов со значением и id всех input
+                 * @name values
+                 * @type {Object} [{id: '..', value:'...'}, ..]
+                 */
+
+                var message = {},
+                    values =  $('input').map(function(i, elem) {
+                    return {
+                        id: $(elem).attr('id'),
+                        value: $(elem).val()
+                    }
+                }).get();
+
+                // указываем название функции которую хотим выполнить
+                message.name = 'setValue';
+
+                // ключ по которому будет сохранено значение в хранилище
+                message.key = 'inputs';
+
+                // значение которое будет сохранено по ключу указанному выше
+                message.value = values;
+
+                message.callback = 'valuesSaved';
+
+                // т.к. PostMessage Работает только со строками, необходимо транслировать наше сообщение в строку
+                // строка должна быть валидным JSON
+                message = JSON.stringify(message);
+
+                this._source.postMessage(message, this._source_origin);
+            },
+
+            /**
+             * Отправить запрос на получение значения сохраненных данных в Storage приставки
+             * @private
+             */
+            _getInputsValues: function () {
+                var message = {};
+
+                // указываем название функции которую хотим выполнить
+                message.name = 'getValue';
+
+                // ключ по которому будет полученно значение из хранилища
+                message.key = 'inputs';
+
+                // имя функции которое вернется для возвращения значения сюда
+                message.callback = 'fullInputsFromStage';
+
+                // т.к. PostMessage Работает только со строками, необходимо транслировать наше сообщение в строку
+                // строка должна быть валидным JSON
+                message = JSON.stringify(message);
+
+                this._source.postMessage(message, this._source_origin);
+            },
+
+            /**
+             * Показать native клваиатуру портала
+             * @param {Object} options
+             *
+             * @param {number} options.x - координата верхнего левого угла блока клавиатуры
+             * @param {number} options.y - координата верхнего левого угла блока клавиатуры
+             *
+             * @param {boolean} [options.invert] - инвертирование положения клавиатуры (при расположении
+             * input снизу экрана)
+             *
+             * @param {number} [options.intervalFastCharInsert] - ms задержка на нажатие клавиш (защита от залипания,
+             * default: 2000ms)
+             *
+             * @param {string} [options.captionOfButtonEnter] - Текст кнопки по которой будет закрыта клавиатура
+             * и передано значение результата
+             *
+             * @param {string} [options.value] - текст для предзаполнения значения в popup клавиатуры
+             *
+             * @param {number} [options.cursorPositionInValue] - положение курсора в тексте
+             * (default opt.input.text.length)
+             *
+             * @param {number} [options.layout] - опция раскладки клавиатуры
+             * 'qwerty_ru' - русская раскладка,
+             * 'qwerty_en' - английская раскладка,
+             * 'numbers' - числовая клавиатура
+             *
+             * @param {string|number} [options.selectedSymbol] - символ на котором поставить позицию курсора выбора
+             * в клавиатуре
+             * для layout === 'qwerty_ru' должен быть буквой руского алфавита или числом (default 'р'),
+             * для layout === 'qwerty_en' должен быть буквой английского алфавита или числом (default 'h'),
+             * для layout === 'number' должен быть числом (default '5'),
+             *
+             * @param {number} [options.upperCase] - true - верзний регистр букв, false - нижний. (default - false)
+             *
+             * @private
+             */
+            _showKeyboard: function (options) {
+                var message = {};
+
+                // указываем название функции которую хотим выполнить
+                message.name = 'showKeyboard';
+
+                // Координаты выерхнего левого угла клавиатуры
+                message.x = Number(options.x);
+                message.y = Number(options.y);
+
+                // инверсия положения - перевернуть клавиатуру необходимо дл
+                message.invert = Boolean(options.invert);
+
+                message.intervalFastCharInsert = Number(options.intervalFastCharInsert || 2000);
+                message.captionOfButtonEnter = String(options.captionOfButtonEnter ||'Ok');
+
+                message.value = String(options.value);
+                message.cursorPositionInValue = Number(options.cursorPositionInValue);
+
+                message.layout = String(options.layout || 'qwerty_ru');
+                message.upperCase = Boolean(options.upperCase);
+
+                message.selectedSymbol = String(options.selectedSymbol)[0];
+
+
+                // Вернуть результат в функцию
+                message.callback = 'getValuesForKeyboard';
+
+                // т.к. PostMessage Работает только со строками, необходимо транслировать наше сообщение в строку
+                // строка должна быть валидным JSON
+                message = JSON.stringify(message);
+
+                this._source.postMessage(message, this._source_origin);
             }
         };
 
@@ -174,8 +339,8 @@
         win.addEventListener('message', function(event) {
             try {
                 var message = JSON.parse(event.data);
-                if (typeof page[message.type] === 'function') {
-                    page[message.type](message, event);
+                if (typeof Retranslator[message.callback] === 'function') {
+                    Retranslator[message.callback](message.data, event);
                 }
             } catch (e) {
                 $$log(e.message, 'log');
